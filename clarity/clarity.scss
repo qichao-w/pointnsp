@@ -1,0 +1,125 @@
+@import '../assets/stylesheets/master';
+
+
+.columns-12 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(12, 1fr);
+}
+
+.columns-10 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(10, 1fr);
+}
+
+.columns-8 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(8, 1fr);
+}
+
+.columns-6 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.columns-6-3d {
+    display: grid;
+    align-items: center;
+    column-gap: 2vw;
+    grid-template-columns: repeat(2, 1.3fr 1.3fr 1fr);
+}
+
+.columns-5 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.columns-4 {
+    display: grid;
+    column-gap: 2.5vw;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.columns-3 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.columns-3-slow-motion {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: 1fr 1fr 2.1fr;
+    img {
+        height: 100%;
+        width: 100%;
+    }
+}
+
+.slow-motion-ref {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.columns-2 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+
+
+@media screen and (max-width: $medium-device) {
+    .columns-12 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .columns-10 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .columns-8 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .columns-6 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .columns-5 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .columns-6-3d {
+        grid-template-columns: 1.3fr 1.3fr 1fr;
+    }
+}
+
+@media screen and (max-width: $small-device) {
+    .columns-12 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .columns-2 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

@@ -1,0 +1,575 @@
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarDini: Masked Auto-Regressive Diffusion for Video Generation at Scale -- Meta AI Research</title>
+    <meta name="description" content="We've presented MarDini, a masked auto-regressive video diffusion model.">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="robots" content="all">
+    <meta content="en_EN" property="og:locale">
+    <meta content="website" property="og:type">
+    <meta content="https://mardini-vidgen.github.io" property="og:url">
+    <meta content="MarDini: Masked Auto-Regressive Diffusion for Video Generation at Scale" property="og:title">
+    <meta content="MarDini: Masked Auto-Regressive Diffusion for Video Generation at Scale" property="og:description">
+    <meta name="google-site-verification" content="wTqxuPNtPluFI59RVJjoKx5xae4slm_158C-5-eWC7I" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@liu_shikun">
+    <meta name="twitter:description" content="MarDini: Masked Auto-Regressive Diffusion for Video Generation at Scale">
+    <meta name="twitter:image:src" content="/assets/figures/mardini.png">
+
+    <link rel="stylesheet" type="text/css" media="all" href="assets/stylesheets/main_free.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="clarity/clarity.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/foundation.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"/>
+    <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            "HTML-CSS": {
+              scale: 95,
+              fonts: ["Gyre-Pagella"],
+              imageFont: null,
+              undefinedFamily: "'Arial Unicode MS', cmbright"
+            },
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+              }
+          });
+    </script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-59EDJ30R2W"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-59EDJ30R2W');
+    </script>
+    <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <!-- Title Page -->
+    <!-- Dark Theme Example -->
+    <!-- <div class="container blog" id="first-content" style="background-color: #304463;">
+        <div class="blog-title white"> -->
+    <div class="container blog" id="first-content" style="background: linear-gradient(135deg, 
+    rgba(238, 244, 255, 1) 0%,   /* Martini clear liquid */
+    rgba(207, 215, 231, 1) 15%,  /* Light silver hint */
+    rgba(175, 189, 206, 1) 35%,  /* Slightly darker silver */
+    rgba(134, 179, 140, 1) 70%,  /* Olive green */
+    rgba(255, 211, 132, 1) 100%  /* Lemon twist or vermouth */
+);">
+        <div class="blog-title no-cover">
+            <div class="blog-intro">
+                <div>
+                    <h1 class="title">MarDini: Masked Auto-Regressive Diffusion for Video Generation at Scale</h1>
+                    <p class="author">
+                        Haozhe Liu<sup>1,2</sup>, Shikun Liu<sup>1</sup>, Zijian Zhou<sup>1</sup>, Mengmeng Xu<sup>1</sup>, Yanping Xie<sup>1</sup>  Xiao Han<sup>1</sup>, 
+                        Juan C. Pérez<sup>1</sup>, Ding Liu<sup>1</sup>, Kumara Kahatapitiya<sup>1</sup>, Menglin Jia<sup>1</sup>, Jui-Chieh Wu<sup>1</sup>, Sen He<sup>1</sup>, 
+                        Tao Xiang<sup>1</sup>, Jürgen Schmidhuber<sup>2</sup>, and Juan-Manuel Pérez-Rúa<sup>1</sup>
+                    </p>
+                    <p class="author" style="padding-top: 0px;">
+                        <sup>1</sup>Meta AI &nbsp;&nbsp; <sup>2</sup>KAUST
+                    </p>
+                    <p class="abstract">
+                        We introduce MarDini, a new family of video diffusion models that integrate the advantages of masked auto-regression (MAR) into a unified diffusion model (DM) framework. MarDini's MAR enables video generation conditioned on any number of masked frames at any frame positions: a single model can handle video interpolation (e.g., masking middle frames), image-to-video generation (e.g., masking from the second frame onward), and video expansion (e.g., masking half the frames). The efficient design allocates most of the computational resources to the low-resolution planning model, making computationally expensive but important spatio-temporal attention feasible at scale. MarDini sets a new state-of-the-art for video interpolation; meanwhile, within few inference steps, it efficiently generates videos on par with those of much more expensive advanced image-to-video models.
+                    </p>
+                    <div class="info">
+                        <div>
+                            <a href="https://arxiv.org/abs/2410.20280" class="button icon" style="background-color: rgba(255, 255, 255, 0.3)"> Paper <i aria-hidden="true">📄</i></a>
+                            <!-- <a href="https://github.com" class="button icon" style="background-color: rgba(255, 255, 255, 0.3)">Code <i class="far fa-code"></i></a>  &nbsp;&nbsp;
+                            <a href="https://www.microsoft.com/en-gb/microsoft-365/powerpoint" class="button icon" style="background-color: rgba(255, 255, 255, 0.3);">Slides <i class="far fa-presentation"></i></a>  &nbsp;&nbsp;
+                            <a href="https://huggingface.co/spaces" class="button icon" style="background-color: rgba(255, 255, 255, 0.3)">Demo <i class="fa-light fa-face-smiling-hands"></i></a> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info">
+                    <p>Technical Report</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container blog main first" id="blog-main">
+        <h1 >
+            Introduction
+        </h1>
+        <p class='text'>
+            We propose a new paradigm for video generation that combines the flexibility of masked auto-regression (MAR) in a continuous space with the robust generative capabilities of diffusion model (DM). Specifically, we present a scalable training recipe and an efficient neural architecture design for video generation. Our model decomposes video generation into two sub-tasks — temporal and spatial modelling — handled by distinct networks with <em>an asymmetric design</em>  based on the following two principles:
+            <ul>
+                <li>
+                    <p class="text"><b>MAR handles long-range temporal modelling, while DM focuses on detailed spatial modelling.</b>  </p>
+                </li>
+                <li>
+                    <p class="text"><b>MAR operates with more parameters at a lower resolution, while DM operates with fewer parameters at a higher resolution.</b> 
+                    </p>
+                </li>
+            </ul>
+        </p>
+
+        <p class="text">
+            Following this principle, our model integrates MAR-based planning signals with a DiT-based lightweight, tiny diffusion model, hence the name MarDini. Our empirical study on MarDini highlights the following key characteristics:
+            <ul >
+                <li>
+                    <p class="text"> <b>Flexibility.</b> With MAR conditioning, MarDini naturally supports a range of video generation tasks through
+                        flexible masking strategies. For example, when given the first frame and masking the rest, it performs image-
+                        to-video generation; when given a video and masking subsequent frames, it performs video expansion;
+                        and, when given the first and last frames and masking the middle frames, it performs video interpolation. </p>
+                </li>
+                <li>
+                    <p class="text">  <b>Scalability.</b>  MarDini can be trained from scratch at scale, without relying on generative image-based
+                        pre-training. In contrast to most video generation models, that treat video as a secondary task following
+                        image generation, MarDini leverages mask ratio tuning to progressively adjust the difficulty of the training
+                        task. This approach enables the model to scale from video interpolation to full video generation, directly
+                        bypassing the need for image-based pre-training.
+                    </p>
+                </li>
+                <li>
+                    <p class="text">  <b>Efficiency.</b>  MarDini's asymmetric design allocates more computational resources to lower resolutions,
+                        making it memory-efficient and fast during inference. With lower overall memory usage, MarDini allows
+                        the deployment of computationally intensive spatio-temporal attention mechanisms at scale, improving its
+                        ability to model complex motion dynamics.
+                    </p>
+                </li>
+            </ul>
+        </p>
+    </div>
+
+    <div class="container blog main gray">
+        <img src="clarity/images/mardini.png">
+        <p class="caption">
+            <b>MarDini Training Pipeline Overview.</b> A latent representation is computed for unmasked frames that serve as a conditional signal to a generative process. On the first hand, we have a planning model that autoregressively encodes global conditioning signals from a low-resolution version of the unmasked latent inputs. On the other hand, the planning signals are fed to the diffusion-based generation model through cross-attention layers. A high-resolution version of the input conditions is also ingested by the diffusion model, enabling generation with a coherent temporal structure and a direct mechanism to attend to fine-grained details of the unmasked frames. MarDini is trained end-to-end via masked frame-level diffusion loss.
+        </p>
+    </div>
+
+    <div class="container blog main">
+        <h1>MarDini Generations</h1>
+        <p class="text">
+            Here, we showcase MarDini's video generation capabilities through diverse masking strategies.
+        </p>
+
+
+        <h2>Image-To-Video Results</h2>
+        <p class="text">
+            The primary application of MarDini is image-to-video generation. We demonstrate this capability by using one reference frame placed in the middle position as a conditioning input, and generating 16 additional frames. In the following, we present a wide range of diverse generated videos which contains 17 frames rendered at 8 FPS, producing smooth 2-second videos.
+        </p>
+    </div>
+
+    <div class="container blog max gray">
+        <div class="slideshow">
+            <div class="navigation">
+                <a class="button icon" id="prev_btn" aria-label="Previous slide"><i aria-hidden="true">←</i></a>
+                <a class="button icon" id="next_btn" aria-label="Next slide"><i aria-hidden="true">→</i></a>
+            </div>
+            <div class="slider">
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/1.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/17.mp4"></video>
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/2.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/18.mp4"></video>
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/3.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/19.mp4"></video>
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/4.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/20.mp4"></video>
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/5.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/21.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/6.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/22.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/7.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/23.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/8.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/24.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/9.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/25.mp4"></video>
+
+                </div>                   
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/10.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/26.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/11.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/27.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/12.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/28.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/13.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/29.mp4"></video>
+
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/14.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/30.mp4"></video>
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/15.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/31.mp4"></video>
+                </div>
+                <div class="slider-item">
+                    <video loop playsinline muted autoplay src="clarity/videos/16.mp4"></video>
+                    <video loop playsinline muted autoplay src="clarity/videos/32.mp4"></video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container blog main">
+        <h2>Video Expansion Results</h2>
+        <p class="text">
+            MarDini is also capable of video expansion by conditioning on existing videos of any duration. We demonstrate this by generating 2-second expansions from 5-frame reference videos, adding 12 new frames to each sequence, shown below.
+        </p>
+    </div>
+
+    <div class="container blog extra-extra-large gray">
+        <div class="columns-6">
+            <img src="clarity/videos/video_expansion_1_0.png">
+            <img src="clarity/videos/video_expansion_1_1.png">
+            <img src="clarity/videos/video_expansion_1_2.png">
+            <img src="clarity/videos/video_expansion_1_3.png">
+            <img src="clarity/videos/video_expansion_1_4.png">
+            <video loop playsinline muted autoplay src="clarity/videos/video_expansion_1.mp4"></video>
+        </div>
+
+        <div class="columns-6">
+            <img src="clarity/videos/video_expansion_2_0.png">
+            <img src="clarity/videos/video_expansion_2_1.png">
+            <img src="clarity/videos/video_expansion_2_2.png">
+            <img src="clarity/videos/video_expansion_2_3.png">
+            <img src="clarity/videos/video_expansion_2_4.png">
+            <video loop playsinline muted autoplay src="clarity/videos/video_expansion_2.mp4"></video>
+        </div>
+
+        <div class="columns-6">
+            <img src="clarity/videos/video_expansion_3_0.png">
+            <img src="clarity/videos/video_expansion_3_1.png">
+            <img src="clarity/videos/video_expansion_3_2.png">
+            <img src="clarity/videos/video_expansion_3_3.png">
+            <img src="clarity/videos/video_expansion_3_4.png">
+            <video loop playsinline muted autoplay src="clarity/videos/video_expansion_3.mp4"></video>
+        </div>
+
+        <div class="columns-6">
+            <img src="clarity/videos/video_expansion_4_0.png">
+            <img src="clarity/videos/video_expansion_4_1.png">
+            <img src="clarity/videos/video_expansion_4_2.png">
+            <img src="clarity/videos/video_expansion_4_3.png">
+            <img src="clarity/videos/video_expansion_4_4.png">
+            <video loop playsinline muted autoplay src="clarity/videos/video_expansion_4.mp4"></video>
+        </div>
+        <p class="caption">
+            The expanded frames (right video) are generated based on the five initial frames (left images). The sequence consists of 17 frames at 8 fps, forming a 2-second video. The conditional frames are from OpenVidHD-0.4M, which was excluded from the training data.
+        </p>
+    </div>
+
+
+    <div class="container blog main">
+        <h2>Video Interpolation Results</h2>
+        <p class="text">
+            MarDini achieves video interpolation by generating intermediate frames using the first and last frames as conditioning signals. When these boundary frames are identical, MarDini can create seamless looping videos.
+        </p>
+    </div>
+
+    <div class="container blog extra-extra-large gray">
+        <div class="slide-menu interpolation">
+            <ul class="dots" id="slide-menu-interpolation">
+                <li class="dot active"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+            </ul>
+        </div>
+        <div class="slide-content-interpolation", style="display: block;">
+            <div class="columns-3">
+                <img src="clarity/videos/video_interp_5_0.png">
+                <img src="clarity/videos/video_interp_5_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/video_interp_5.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-interpolation", style="display: none;">
+            <div class="columns-3">
+                <img src="clarity/videos/video_interp_1_0.png">
+                <img src="clarity/videos/video_interp_1_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/video_interp_1.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-interpolation", style="display: none;">
+            <div class="columns-3">
+                <img src="clarity/videos/video_interp_2_0.png">
+                <img src="clarity/videos/video_interp_2_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/video_interp_2.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-interpolation", style="display: none;">
+            <div class="columns-3">
+                <img src="clarity/videos/video_interp_3_0.png">
+                <img src="clarity/videos/video_interp_3_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/video_interp_3.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-interpolation", style="display: none;">
+            <div class="columns-3">
+                <img src="clarity/videos/video_interp_4_0.png">
+                <img src="clarity/videos/video_interp_4_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/video_interp_4.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-interpolation", style="display: none;">
+            <div class="columns-3">
+                <img src="clarity/videos/video_interp_6_0.png">
+                <img src="clarity/videos/video_interp_6_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/video_interp_6.mp4"></video>
+            </div>
+        </div>
+        <p class="caption">
+            The intermediate frames (right video) are generated based on the first and last frames (left images). The sequence consists of 17 frames at 8 fps, forming a 2-second video. The conditional frames are from OpenVidHD-0.4M, which was excluded from the training data.
+        </p>
+    </div>
+
+
+
+    <div class="container blog main">
+        <h2>Auto-Regressive Generation for Slow-Motion Videos</h2>
+        <p class="text">
+            By using MAR for high-level planning, MarDini supports auto-regressive inference, generating additional frames beyond those defined in training. We demonstrate this with hierarchical auto-regressive generation: starting with a video, we segment it into multiple clips, expand each clip, and treat the expanded clip as a new video for recursive interpolation. For example, starting with 4 images, MarDini uses a 17-frame window to expand them into a 128-frame slow-motion video (64× expansion). This shows that our model isn't constrained by the training window size, emphasizing its potential for long-range video generation.
+        </p>
+    </div>
+    <div class="container blog extra-extra-large gray">
+        <div class="slide-menu slow">
+            <ul class="dots" id="slide-menu-slow">
+                <li class="dot active"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+            </ul>
+        </div>
+        <div class="slide-content-slow", style="display: block;">
+            <div class="columns-3-slow-motion">
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/fire_man_0.png">
+                    <img src="clarity/videos/slow_motion/fire_man_1.png" style="padding-bottom: 0;">
+                </div>
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/fire_man_2.png">
+                    <img src="clarity/videos/slow_motion/fire_man_3.png" style="padding-bottom: 0;">
+                </div>
+                <video loop playsinline muted autoplay src="clarity/videos/slow_motion/fire_man.mp4" style="padding-bottom: 0"></video>
+            </div>
+        </div>
+        <div class="slide-content-slow", style="display: none;">
+            <div class="columns-3-slow-motion">
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/slomo_1.png">
+                    <img src="clarity/videos/slow_motion/slomo_2.png" style="padding-bottom: 0;">
+                </div>
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/slomo_3.png">
+                    <img src="clarity/videos/slow_motion/slomo_4.png" style="padding-bottom: 0;">
+                </div>
+                <video loop playsinline muted autoplay src="clarity/videos/slow_motion/slomo.mp4" style="padding-bottom: 0"></video>
+            </div>
+        </div>
+        <div class="slide-content-slow", style="display: none;">
+            <div class="columns-3-slow-motion">
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/sea_0.png">
+                    <img src="clarity/videos/slow_motion/sea_1.png" style="padding-bottom: 0;">
+                </div>
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/sea_2.png">
+                    <img src="clarity/videos/slow_motion/sea_3.png" style="padding-bottom: 0;">
+                </div>
+                <video loop playsinline muted autoplay src="clarity/videos/slow_motion/sea.mp4" style="padding-bottom: 0"></video>
+            </div>
+        </div>
+        <div class="slide-content-slow", style="display: none;">
+            <div class="columns-3-slow-motion">
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/wine_0.png">
+                    <img src="clarity/videos/slow_motion/wine_1.png" style="padding-bottom: 0;">
+                </div>
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/wine_2.png">
+                    <img src="clarity/videos/slow_motion/wine_3.png" style="padding-bottom: 0;">
+                </div>
+                <video loop playsinline muted autoplay src="clarity/videos/slow_motion/wine.mp4" style="padding-bottom: 0"></video>
+            </div>
+        </div>
+        <div class="slide-content-slow", style="display: none;">
+            <div class="columns-3-slow-motion">
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/fire_0.png">
+                    <img src="clarity/videos/slow_motion/fire_1.png" style="padding-bottom: 0;">
+                </div>
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/fire_2.png">
+                    <img src="clarity/videos/slow_motion/fire_3.png" style="padding-bottom: 0;">
+                </div>
+                <video loop playsinline muted autoplay src="clarity/videos/slow_motion/fire.mp4" style="padding-bottom: 0"></video>
+            </div>
+        </div>
+        <div class="slide-content-slow", style="display: none;">
+            <div class="columns-3-slow-motion">
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/fog_0.png">
+                    <img src="clarity/videos/slow_motion/fog_1.png" style="padding-bottom: 0;">
+                </div>
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/fog_2.png">
+                    <img src="clarity/videos/slow_motion/fog_3.png" style="padding-bottom: 0;">
+                </div>
+                <video loop playsinline muted autoplay src="clarity/videos/slow_motion/fog.mp4" style="padding-bottom: 0"></video>
+            </div>
+        </div>
+        <div class="slide-content-slow", style="display: none;">
+            <div class="columns-3-slow-motion">
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/orange_0.png">
+                    <img src="clarity/videos/slow_motion/orange_1.png" style="padding-bottom: 0;">
+                </div>
+                <div class="slow-motion-ref">
+                    <img src="clarity/videos/slow_motion/orange_2.png">
+                    <img src="clarity/videos/slow_motion/orange_3.png" style="padding-bottom: 0;">
+                </div>
+                <video loop playsinline muted autoplay src="clarity/videos/slow_motion/orange.mp4" style="padding-bottom: 0"></video>
+            </div>
+        </div>
+        <p class="caption">
+            The results are auto-regressively generated from four initial frames (left images) into a 128-frame video (right video). The conditional frames are from OpenVidHD-0.4M or pexels, which was excluded from the training data.
+        </p>
+    </div>
+    <div class="container blog main">
+        <h2>Zero Shot 3D View Synthesis</h2>
+        <p class="text">
+            Although trained solely on video data, MarDini shows preliminary spatial understanding, suggesting potential for 3D applications. In the following example, two views of a fixed object serve as the first and last reference frames, while intermediate frames are generated, similar to our video interpolation task. The model effectively produces convincing, 3D-consistent views, showcasing its promise for 3D generation. Notably, no camera motion control signals were used. We plan to explore MarDini's performance on 3D data with better control in future work.
+        </p>
+
+    </div>
+    <div class="container blog extra-extra-large gray-linear">
+        <div class="slide-menu nvs">
+            <ul class="dots" id="slide-menu-nvs">
+                <li class="dot active"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+            </ul>
+        </div>
+        <div class="slide-content-nvs", style="display: block;">
+            <div class="columns-6">
+                <img src="clarity/videos/3DView/3D_1_input_0.png">
+                <img src="clarity/videos/3DView/3D_1_input_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/3D_1.mp4"></video>
+                <img src="clarity/videos/3DView/3D_2_input_0.png">
+                <img src="clarity/videos/3DView/3D_2_input_1.png">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/3D_2.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-nvs", style="display: none;">
+            <div class="columns-6-3d">
+                <img src="clarity/videos/3DView/alarm_0.jpg">
+                <img src="clarity/videos/3DView/alarm_1.jpg">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/alarm.mp4"></video>
+                <img src="clarity/videos/3DView/schoolbus_0.jpg">
+                <img src="clarity/videos/3DView/schoolbus_1.jpg">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/schoolbus.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-nvs", style="display: none;">
+            <div class="columns-6-3d">
+                <img src="clarity/videos/3DView/shoes_0.jpg">
+                <img src="clarity/videos/3DView/shoes_1.jpg">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/shoes.mp4"></video>
+                <img src="clarity/videos/3DView/sofa_0.jpg">
+                <img src="clarity/videos/3DView/sofa_2.jpg">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/sofa.mp4"></video>
+            </div>
+        </div>
+        <div class="slide-content-nvs", style="display: none;">
+            <div class="columns-6-3d">
+                <img src="clarity/videos/3DView/teapot_0.jpg">
+                <img src="clarity/videos/3DView/teapot_1.jpg">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/teapot.mp4"></video>
+                <img src="clarity/videos/3DView/toaster_0.jpg">
+                <img src="clarity/videos/3DView/toaster_1.jpg">
+                <video loop playsinline muted autoplay src="clarity/videos/3DView/toaster.mp4"></video>
+            </div>
+        </div>
+        <p class="caption">
+            Starting with two views of an object, MarDini generates the intermediate frames, creating novel views. Notably, MarDini is trained without any 3D data but still manages to capture spatial information through video. The conditional frames are from GSO-30 dataset, which was excluded from the training data.
+        </p>
+    </div>
+
+    <div class="container blog main">
+        <h1>Conclusion</h1>
+        <p class="text">
+            We have introduced a new family of generative models for video, i.e., MarDini, based on auto-regressive diffusion, wherein a large planning model offers powerful conditioning to a much smaller diffusion model.
+            Our design philosophy considers efficiency from model conception, and so our heaviest model component is only executed once at lower resolution inputs, whereas our generative module focuses on fine-grained details at the frame level, reconciling high-level conditioning and image details.
+            Our model is unique in that it leverages a masked auto-regressive loss directly at the frame level. MarDini is afforded with multiple generative capabilities from a single model, e.g., long-term video interpolation, video expansion, and image animation.
+        </p>
+    </div>
+
+    <div class="container blog main">
+        <h1>Citation</h1>
+        <p class="text">
+            To cite the paper, please use the below:
+        </p>
+<pre><code class="plaintext">@article{liu2024mardini,
+ title={MarDini: Masked Autoregressive Diffusion for Video Generation at Scale},
+ author={Haozhe Liu and Shikun Liu and Zijian Zhou and Mengmeng Xu and Yanping Xie and Xiao Han and Juan C. Pérez and Ding Liu and Kumara Kahatapitiya and Menglin Jia and Jui-Chieh Wu and Sen He and Tao Xiang and Jürgen Schmidhuber and Juan-Manuel Pérez-Rúa},
+ journal={arXiv preprint arXiv:2410.20280},
+  year={2024}
+}</code></pre>
+    </div>
+
+    <!-- Footer Page -->
+    <footer>
+        <div class="container">
+            <p>
+                This website is built on the <a href="https://shikun.io/projects/clarity">Clarity Template</a>, designed by <a href="https://shikun.io/">Shikun Liu</a>.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="clarity/clarity.js"></script>
+    <script src="assets/scripts/main.js"></script>
+    </html>
+</body>
