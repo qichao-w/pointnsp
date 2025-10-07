@@ -89,7 +89,7 @@
         <!-- 注意：HTML 的 <img> 标签不支持直接显示 PDF 文件。请将 paradigm.pdf 转换为 PNG、JPG 或 SVG 等网页友好的图片格式后再引用。 -->
         <img src="assets/figures/paradigm.png" alt="paradigm figure">
         <p class="caption" style="font-size: 0.8em;">
-            <b>Three types of point cloud generative models: </b> (a) diffusion-based methods that iteratively denoise shapes starting from Gaussian noise; (b) vanilla autoregressive (AR) methods that predict the next point by flattening the 3D shape into a sequence; and (c) our proposed \method, which predicts next-scale level-of-detail in a coarse-to-fine manner.
+            <b>Three types of point cloud generative models: </b> (a) diffusion-based methods that iteratively denoise shapes starting from Gaussian noise; (b) vanilla autoregressive (AR) methods that predict the next point by flattening the 3D shape into a sequence; and (c) our proposed PointNSP, which predicts next-scale level-of-detail in a coarse-to-fine manner.
         </p>
     </div>
     </div>
@@ -105,6 +105,50 @@
     </div>
 
     <div class="content">
+        <!-- 注意：HTML 的 <img> 标签不支持直接显示 PDF 文件。请将 paradigm.pdf 转换为 PNG、JPG 或 SVG 等网页友好的图片格式后再引用。 -->
+        <img src="assets/figures/method.png" alt="paradigm figure">
+        <p class="caption" style="font-size: 0.8em;">
+            Illustration of training a multi-scale 3D point cloud causal transformer with intermediate decoding, upsampling, position-aware soft masks, and block-wise causal masks.
+        </p>
+    </div>
+    </div>
+
+    <div class="content">
+        <!-- 注意：HTML 的 <img> 标签不支持直接显示 PDF 文件。请将 paradigm.pdf 转换为 PNG、JPG 或 SVG 等网页友好的图片格式后再引用。 -->
+        <img src="assets/figures/comparison-wide.png" alt="paradigm figure">
+        <p class="caption" style="font-size: 0.8em;">
+            Our generation results (right) compared to baseline models (left). PointNSP generates high-quality and diverse 3D point clouds.
+        </p>
+    </div>
+    </div>
+
+    <div class="content">
+        <!-- 注意：HTML 的 <img> 标签不支持直接显示 PDF 文件。请将 paradigm.pdf 转换为 PNG、JPG 或 SVG 等网页友好的图片格式后再引用。 -->
+        <img src="assets/figures/multi-scale.png" alt="paradigm figure">
+        <p class="caption" style="font-size: 0.8em;">
+            Visualization of multi-scale point clouds during the Point'NSP generation process as the scale <span>K</span> increases.
+        </p>
+    </div>
+    </div>
+
+    <div class="content">
+        <div style="display: flex; justify-content: center; align-items: flex-start; gap: 24px;">
+            <div style="flex: 1; text-align: center;">
+                <img src="assets/figures/completion.png" alt="completion figure" style="max-width: 92%; height: auto;">
+                <p class="caption" style="font-size: 0.8em;">
+                    Visualizations of point cloud completion results.
+                </p>
+            </div>
+            <div style="flex: 1; text-align: center;">
+                <img src="assets/figures/upsampling.png" alt="upsampling figure" style="max-width: 100%; height: auto;">
+                <p class="caption" style="font-size: 0.8em;">
+                    Visualizations of point cloud upsampling results.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="content">
         <h2>MarDini Generations</h2>
         <p class="text">
             Here, we showcase MarDini's video generation capabilities through diverse masking strategies.
@@ -497,19 +541,20 @@
             Our design philosophy considers efficiency from model conception, and so our heaviest model component is only executed once at lower resolution inputs, whereas our generative module focuses on fine-grained details at the frame level, reconciling high-level conditioning and image details.
             Our model is unique in that it leverages a masked auto-regressive loss directly at the frame level. MarDini is afforded with multiple generative capabilities from a single model, e.g., long-term video interpolation, video expansion, and image animation.
         </p>
-    </div>
-
+    </div> -->
+    
     <div class="content">
         <h1>Citation</h1>
         <p class="text">
             To cite the paper, please use the below:
         </p>
-<pre><code class="plaintext">@article{liu2024mardini,
- title={MarDini: Masked Autoregressive Diffusion for Video Generation at Scale},
- author={Haozhe Liu and Shikun Liu and Zijian Zhou and Mengmeng Xu and Yanping Xie and Xiao Han and Juan C. Pérez and Ding Liu and Kumara Kahatapitiya and Menglin Jia and Jui-Chieh Wu and Sen He and Tao Xiang and Jürgen Schmidhuber and Juan-Manuel Pérez-Rúa},
- journal={arXiv preprint arXiv:2410.20280},
-  year={2024}
-}</code></pre>
+<pre><code class="plaintext">
+    @article{meng20253d,
+        title={3D Point Cloud Generation via Autoregressive Up-sampling},
+        author={Meng, Ziqiao and Wang, Qichao and Zhou, Zhipeng and King, Irwin and Zhao, Peilin},
+        journal={arXiv preprint arXiv:2503.08594},
+        year={2025}
+      }</code></pre>
     </div>
 
     <!-- Footer Page -->
